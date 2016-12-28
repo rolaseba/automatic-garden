@@ -40,7 +40,7 @@ class parametros(object):
 
 try:
    
-    x = parametros(28,23) #seteo por defecto
+    x = parametros(28,16) #seteo por defecto
         
     set=input('Modificar parámetros? [S/N]')
     if (set == 'S' or set == 's'):
