@@ -1,6 +1,7 @@
 import os
 import glob
 import time
+import sqlite3
 import RPi.GPIO as GPIO
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(24,GPIO.OUT) # Led Rojo
@@ -32,13 +33,23 @@ def read_temp():
        # temp_f = temp_c * 9.0 / 5.0 + 32.0   # usado en C
         return temp_c
 
+conn = sqlite3.connect('base.db')
+c = conn.cursor()
+
+def create_table():
+    c.execute("CREATE TABLE IF NOT EXISTS stuffToPlot(id INTEGER PRIMARY KEY AUTOINCREMENT, temp REAL, alarm_hi REAL, alarm_low REAL, datestamp TEXT)")
+
+
+
+
 class parametros(object):
     def __init__(self, alarm_hi, alarm_low):
         self.alarm_hi = alarm_hi
         self.alarm_low = alarm_low
 
-
 try:
+
+   
    
     x = parametros(28,16) #seteo por defecto
         
@@ -51,34 +62,40 @@ try:
 
     
     tempold = read_temp()
-    print(tempold,' °C') #unica vez
+    print(tempold,' °C <- sensor andando') #unica vez
     
-    file = open("datos.txt", "w")
+  
+    create_table()
     
     while True:
         temp = read_temp()
-        if temp != tempold:
-            file.write(str (temp)+' °C'+time.strftime('   %a %b %d %H:%M:%S %Y')+'\n') # grabo temp en archivo txt
-            if (temp < x.alarm_hi) & (temp > x.alarm_low):
-                print(temp,' °C')
-                GPIO.output(23,1)
-                GPIO.output(24,0)
-            elif temp > x.alarm_hi:
-                print (temp,' °C ---> Muy Caliente')
-                GPIO.output(23,0)
-                GPIO.output(24,1)
-            elif temp < x.alarm_low:
-                print (temp,' °C ---> Muy Frio')
-                GPIO.output(23,0)
-                GPIO.output(24,1)
-            tempold = temp
-            time.sleep(1)
+            
+        if (temp < x.alarm_hi) & (temp > x.alarm_low):
+            print(temp,' °C')
+            GPIO.output(23,1)
+            GPIO.output(24,0)
+        elif temp > x.alarm_hi:
+            print (temp,' °C ---> Muy Caliente')
+            GPIO.output(23,0)
+            GPIO.output(24,1)
+        elif temp < x.alarm_low:
+            print (temp,' °C ---> Muy Frio')
+            GPIO.output(23,0)
+            GPIO.output(24,1)
+         
+        date = time.strftime('%y-%m-%d - %H:%M:%S')
+        c.execute("INSERT INTO stuffToPlot (id, temp, alarm_hi, alarm_low, datestamp) VALUES (null,?,?,?,?)",
+                      (temp, x.alarm_hi, x.alarm_low, date))
+        conn.commit()
+    
+        time.sleep(2)
         
     # Interrumpe con control+c 
 except KeyboardInterrupt:
     pass
 finally:
-    file.close()
+    c.close()
+    conn.close()
     GPIO.cleanup()  #clean exit
             
 
