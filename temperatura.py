@@ -1,11 +1,14 @@
+# Garden project from Sebastian Rolando.
+# The programming languaje is Python 3
+
 import os
 import glob
 import time
 import sqlite3
 import RPi.GPIO as GPIO
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(24,GPIO.OUT) # Led Rojo
-GPIO.setup(23,GPIO.OUT) # Led Verde
+GPIO.setup(24,GPIO.OUT) # red Led <-- out of range
+GPIO.setup(23,GPIO.OUT) # green Led
 
 os.system('modprobe w1-gpio')
 os.system('modprobe w1-therm')
@@ -30,42 +33,49 @@ def read_temp():
     if equals_pos != -1:
         temp_string = lines[1][equals_pos+2:]
         temp_c = float(temp_string) / 1000.0
-       # temp_f = temp_c * 9.0 / 5.0 + 32.0   # usado en C
+       # temp_f = temp_c * 9.0 / 5.0 + 32.0   # we don´t use Fahrenheit grades
         return temp_c
 
-conn = sqlite3.connect('base.db')
+conn = sqlite3.connect('dbase.db')
 c = conn.cursor()
 
 def create_table():
     c.execute("CREATE TABLE IF NOT EXISTS stuffToPlot(id INTEGER PRIMARY KEY AUTOINCREMENT, temp REAL, alarm_hi REAL, alarm_low REAL, datestamp TEXT)")
-
-
+    c.execute("CREATE TABLE IF NOT EXISTS parameters(id INTEGER PRIMARY KEY AUTOINCREMENT, palarm_hi REAL, palarm_low REAL)")
 
 
 class parametros(object):
     def __init__(self, alarm_hi, alarm_low):
         self.alarm_hi = alarm_hi
         self.alarm_low = alarm_low
+    
 
 try:
+    create_table()  # create database tables
 
-   
-   
+    tempold = read_temp()
+    print(tempold,' °C <- sensor andando') #sensor working
+
     x = parametros(28,16) #seteo por defecto
         
     set=input('Modificar parámetros? [S/N]')
     if (set == 'S' or set == 's'):
         x.alarm_hi = float(input('Ingresar Temperatura Máxima [°C] = '))       
-        x.alarm_low = float(input('Ingresar Temperatura Mínima [°C]= '))
+        x.alarm_low = float(input('Ingresar Temperatura Mínima [°C] = '))
+        # guardo parametros en tabla
+        c.execute("INSERT INTO parameters(id, palarm_hi, palarm_low) VALUES (null,?,?)",
+                  (x.alarm_hi, x.alarm_low))
+        conn.commit()
     else:
-       print(' Los valores por defecto son 28°C y 23°C')
-
-    
-    tempold = read_temp()
-    print(tempold,' °C <- sensor andando') #unica vez
-    
-  
-    create_table()
+        c.execute('SELECT max(id) FROM parameters')
+        max_id = c.fetchone()[0]
+        #print('max_id =', max_id)
+        print(' Los valores por defecto son =')
+        c.execute('SELECT * FROM parameters WHERE id=?',(max_id,))
+        a = c.fetchone()
+        print('a =', a)
+       
+              
     
     while True:
         temp = read_temp()
