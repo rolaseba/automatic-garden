@@ -1,5 +1,6 @@
 # Garden project from Sebastian Rolando.
 # The programming languaje is Python 3
+# Keyboard Interrupt with "Control+c"
 
 import os
 import glob
@@ -56,9 +57,9 @@ try:
     tempold = read_temp()
     print(tempold,' °C <- sensor andando') #sensor working
 
-    x = parametros(28,16) #seteo por defecto
+    x = parametros(1,1) #seteo con valores para que no de error
         
-    set=input('Modificar parámetros? [S/N]')
+    set=input('Modificar parámetros? [S/N] = ')
     if (set == 'S' or set == 's'):
         x.alarm_hi = float(input('Ingresar Temperatura Máxima [°C] = '))       
         x.alarm_low = float(input('Ingresar Temperatura Mínima [°C] = '))
@@ -67,13 +68,16 @@ try:
                   (x.alarm_hi, x.alarm_low))
         conn.commit()
     else:
+        # busco los últimos valores de parametros seteados
         c.execute('SELECT max(id) FROM parameters')
         max_id = c.fetchone()[0]
-        #print('max_id =', max_id)
         print(' Los valores por defecto son =')
         c.execute('SELECT * FROM parameters WHERE id=?',(max_id,))
         a = c.fetchone()
-        print('a =', a)
+        x.alarm_low = a[2]
+        x.alarm_hi = a[1]
+        print('Alarma máxima =', x.alarm_hi, ' °C')
+        print('Alarma mínima =', x.alarm_low, ' °C')
        
               
     
