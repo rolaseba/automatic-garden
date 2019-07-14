@@ -1,6 +1,9 @@
 # Garden project from Sebastian Rolando.
 # The programming languaje is Python 3
 # Keyboard Interrupt with "Control+c"
+# pin16 = GPIO23, out, pullup_ext=y, led green
+# pin18 = GPIO24, out, pullup_ext=Y, led red
+# pin = GPIO, 1-wire, DS18B20
 
 import os
 import glob
@@ -11,8 +14,9 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(24,GPIO.OUT) # red Led <-- out of range
 GPIO.setup(23,GPIO.OUT) # green Led
 
-os.system('modprobe w1-gpio')
-os.system('modprobe w1-therm')
+## with old raspbian OS uncomment
+#os.system('modprobe w1-gpio')
+#os.system('modprobe w1-therm')
 
 base_dir = '/sys/bus/w1/devices/'
 device_folder = glob.glob(base_dir + '28*')[0]
