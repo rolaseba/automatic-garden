@@ -1,7 +1,7 @@
 <h1 align="center">Hi 👋, I'm Sebastian Rolando</h1>
 <h3 align="center">I'm an electronic engineer passionate about Data Science.</h3>
 
-<h4 align="left">This is a projet wrote in Python for a Raspberry board. In this one sens humudity and temperature, then values are logged in a SQlite database. /h4>
+This is a projet wrote in Python for a Raspberry board.</p>  In this one sense humidity and temperature using 1-wire DS18B20, then values are logged in a SQlite database.
 
 <h3 align="left">Connect with me:</h3>
 <p align="left">
