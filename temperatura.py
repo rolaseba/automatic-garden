@@ -1,4 +1,4 @@
-# Garden project from Sebastian Rolando.
+# Garden project by Sebastian Rolando.
 # The programming languaje is Python 3
 # Keyboard Interrupt with "Control+c"
 # pin16 = GPIO23, out, pullup_ext=y, led green
